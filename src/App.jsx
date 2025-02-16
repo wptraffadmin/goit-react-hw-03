@@ -2,48 +2,51 @@ import { useState, useEffect } from 'react';
 import ContactForm from './components/ContactForm/ContactForm';
 import ContactList from './components/ContactList/ContactList';
 import SearchBox from './components/SearchBox/SearchBox';
-import { getContacts, addContact as addContactAPI, deleteContact as deleteContactAPI } from './api/contactsAPI';
+import { nanoid } from 'nanoid';
 import './App.css';
 
 function App() {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = localStorage.getItem('contacts');
+    return savedContacts ? JSON.parse(savedContacts) : [
+      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    ];
+  });
+
   const [filter, setFilter] = useState('');
 
-  // Завантаження контактів при першому рендері
   useEffect(() => {
-    const fetchContacts = async () => {
-      const data = await getContacts();
-      setContacts(data);
-    };
-    fetchContacts();
-  }, []);
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  // Додавання контакту
-  const handleAddContact = async (newContact) => {
-    const addedContact = await addContactAPI(newContact.name, newContact.number);
-    setContacts((prevContacts) => [...prevContacts, addedContact]);
+  const addContact = (newContact) => {
+    const contact = {
+      ...newContact,
+      id: nanoid(),
+    };
+    setContacts((prevContacts) => [...prevContacts, contact]);
   };
 
-  // Видалення контакту
-  const handleDeleteContact = async (contactId) => {
-    await deleteContactAPI(contactId);
+  const deleteContact = (contactId) => {
     setContacts((prevContacts) =>
       prevContacts.filter((contact) => contact.id !== contactId)
     );
   };
 
-  // Фільтрація контактів
   const filteredContacts = contacts.filter((contact) =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
-    <div>
+    <>
       <h1>Phonebook</h1>
-      <ContactForm onSubmit={handleAddContact} />
+      <ContactForm onSubmit={addContact} />
       <SearchBox value={filter} onChange={(e) => setFilter(e.target.value)} />
-      <ContactList contacts={filteredContacts} onDeleteContact={handleDeleteContact} />
-    </div>
+      <ContactList contacts={filteredContacts} onDeleteContact={deleteContact} />
+    </>
   );
 }
 
