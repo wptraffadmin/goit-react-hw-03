@@ -4,11 +4,14 @@ import styles from './ContactList.module.css';
 
 const ContactList = ({ contacts, onDeleteContact }) => {
   return (
-    <ul className={styles.list}>
-      {contacts.map((contact) => (
-        <Contact key={contact.id} contact={contact} onDeleteContact={onDeleteContact} />
-      ))}
-    </ul>
+    <div>
+      <h2>Contacts</h2>
+      <ul className={styles.list}>
+        {contacts.map((contact) => (
+          <Contact key={contact.id} contact={contact} onDeleteContact={onDeleteContact} />
+        ))}
+      </ul>
+    </div>
   );
 };
 
